@@ -111,7 +111,7 @@
             <p>Detailed Scores:</p>
             <pre id="detailed-scores"></pre>
         </div>
-        <button class="button" onclick="downloadResults()">Download Results</button>
+        <button class="button" onclick="sendResultsByEmail()">Send Results by Email</button>
     </div>
 
     <script>
@@ -250,6 +250,33 @@
             document.getElementById('detailed-scores').textContent = detailedScores;
         }
 
+        function sendResultsByEmail() {
+                const recipientEmail = 'yujiaxiao@link.cuhk.edu.hk'; // 替换为指定的邮箱地址
+                const subject = 'Speaker Tone Evaluation Results';
+                
+                // 准备邮件内容
+                const average = scores.reduce((a, b) => a + b, 0) / scores.length;
+                const detailedScores = audioFiles.map((file, index) => {
+                    const fileName = file.split('/').pop();
+                    return `${fileName}: ${scores[index]}`;
+                }).join('\n');
+                
+                const emailBody = `
+        Average Score: ${average.toFixed(2)}
+        
+        Detailed Scores:
+        ${detailedScores}
+        
+        Test completed on: ${new Date().toLocaleString()}
+                `.trim();
+        
+                // 创建mailto链接
+                const mailtoLink = `mailto:${recipientEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
+                
+                // 打开邮件客户端
+                window.location.href = mailtoLink;
+            }
+        
         function downloadResults() {
             const results = {
                 average: scores.reduce((a, b) => a + b, 0) / scores.length,
