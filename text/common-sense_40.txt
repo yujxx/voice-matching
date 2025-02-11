@@ -1,0 +1,7 @@
+Host：Hello and welcome to our talk show. I'm your host, and today we have two distinguished guests to discuss automation and its implications for job creation and technological progress. Let's welcome Michael Owens and Patricia Johnson!
+Host：Michael, you're a technology expert and futurist with substantial experience in managing automation processes, right?
+Michael Owens：That's correct. Automation is essentially redefining the way we engage human involvement in different processes. It targets areas which were primarily dependent on humans, ultimately reshaping our approach to job creation.
+Host：Interesting. And from your perspective, what jobs will take center stage in this era of automation?
+Michael Owens：Job creation will likely focus on jobs requiring high human input like creativity and emotional intelligence. Also, jobs related to the design, development, and maintenance of automated systems will be in demand, in my opinion.
+Host：Intriguing indeed. Patricia, you've been studying the labor market for over two decades now. What's your take on this?
+Patricia Johnson：Yes, Michael's right, automation both eliminates certain jobs and creates others. The issue is, transitioning from one sector to another could lead to what we call frictional unemployment, because the necessary skills for emerging jobs may be lacking.
