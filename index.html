@@ -3,161 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Page</title>
+    <title>Speaker Tone Evaluation</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            background-color: #f9f9f9;
+            padding: 20px;
+            background-color: #f5f5f5;
         }
         .container {
-            text-align: center;
-            max-width: 600px;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         .hidden {
             display: none;
         }
         .button {
-            margin: 10px;
-            padding: 10px 20px;
-            background-color: #007BFF;
+            padding: 12px 24px;
+            background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
+            margin: 10px 0;
         }
         .button:hover {
-            background-color: #0056b3;
+            background-color: #45a049;
         }
-        .score-buttons button {
-            margin: 5px;
-            padding: 10px;
-            background-color: #e0e0e0;
-            border: 1px solid #ccc;
+        .score-buttons {
+            margin: 20px 0;
+        }
+        .score-button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            border: 2px solid #4CAF50;
+            background-color: white;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
+            transition: all 0.3s;
         }
-        .score-buttons button:hover {
-            background-color: #d0d0d0;
+        .score-button:hover {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .score-button.selected {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .text-content {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            white-space: pre-line;
+        }
+        .progress {
+            margin: 20px 0;
+            font-weight: bold;
+            color: #666;
         }
     </style>
 </head>
 <body>
     <div class="container" id="guidance-page">
-        <h1>Welcome to the Test Page</h1>
-        <p>
-        On this test page, you will go through 40 items. Each item includes an audio file and a corresponding text file. 
-        The text will display the speakers and their dialogue, with three speakers in each conversation. 
-        Your task is to listen to the audio, read the text, and judge whether the tone of each speaker matches the current context and scenario based on your subjective impression. Then, provide a rating from 0 to 3:
-        </p>
-        <ul>
-            <li>0: Completely does not match</li>
-            <li>1: Only one speaker matches</li>
-            <li>2: Two speakers match</li>
-            <li>3: All speakers mostly match</li>
-        </ul>
-        <p>
+        <h1>Speaker Tone Evaluation Test</h1>
+        <div class="text-content">
+            On this test page, you will go through 40 items. Each item includes an audio file and a corresponding text file. The text will display the speakers and their dialogue, with three speakers in each conversation. Your task is to listen to the audio, read the text, and judge whether the tone of each speaker matches the current context and scenario based on your subjective impression. Then, provide a rating from 0 to 3:
+
+            0: Completely does not match
+            1: Only one speaker matches
+            2: Two speakers match
+            3: All speakers mostly match
+
             During the audio playback, you can drag the progress bar; you only need to ensure you hear the parts where all three speakers are talking, without needing to listen to each speaker's complete dialogue.
-        </p>
-        <p>
-            在此测试页面上，您将处理40个项目。每个项目包括一个音频文件和一个对应的文本文件。  
-            文本中会展示说话人及其说话内容，每组对话中有三个说话人。  
-            您的任务是听音频、阅读文本，根据您的主观感受，判断音频中每个说话人的音色是否符合当前的上下文和场景，然后给出评分，评分范围从0到3：
-        </p>
-        <ul>
-            <li>0分：完全不符合</li>
-            <li>1分：只有一个说话人符合</li>
-            <li>2分：两个说话人符合</li>
-            <li>3分：基本都符合</li>
-        </ul>
-        <p>
-            在听音频的过程中，您可以拖动进度条，只需确保听到三个说话人的发言部分，不要求听完每个人的完整说话内容。
-        </p>
-        <button class="button" onclick="startTest()">Start</button>
+        </div>
+        <button class="button" onclick="startTest()">Start Evaluation</button>
     </div>
 
     <div class="container hidden" id="test-page">
-        <h2 id="item-title">Item 1</h2>
-        <audio id="audio-player" controls></audio>
-        <p id="text-content"></p>
+        <div class="progress">Progress: <span id="progress-text">1/40</span></div>
+        <audio id="audio-player" controls style="width: 100%"></audio>
+        <div class="text-content" id="text-content"></div>
         <div class="score-buttons">
-            <button onclick="recordScore(0)">0</button>
-            <button onclick="recordScore(1)">1</button>
-            <button onclick="recordScore(2)">2</button>
-            <button onclick="recordScore(3)">3</button>
+            <button class="score-button" onclick="selectScore(0)">0</button>
+            <button class="score-button" onclick="selectScore(1)">1</button>
+            <button class="score-button" onclick="selectScore(2)">2</button>
+            <button class="score-button" onclick="selectScore(3)">3</button>
         </div>
-        <button class="button" onclick="nextItem()">Next</button>
+        <button class="button" id="next-button" onclick="nextItem()" disabled>Next</button>
     </div>
 
     <div class="container hidden" id="result-page">
-        <h1>Results</h1>
-        <p id="average-score"></p>
-        <p id="detailed-scores"></p>
+        <h2>Evaluation Results</h2>
+        <div class="text-content">
+            <p>Average Score: <span id="average-score"></span></p>
+            <p>Detailed Scores:</p>
+            <pre id="detailed-scores"></pre>
+        </div>
+        <button class="button" onclick="downloadResults()">Download Results</button>
     </div>
 
     <script>
-        const audioFolder = 'audio/';
-        const textFolder = 'text/';
-        const files = Array.from({ length: 40 }, (_, i) => `file${i + 1}`);
-        const scores = [];
+        let audioFiles = [];
+        let textFiles = [];
         let currentIndex = 0;
+        let scores = [];
+        let selectedScore = null;
 
-        function startTest() {
+        async function loadFileList() {
+            try {
+                const response = await fetch('audio/');
+                const text = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/html');
+                audioFiles = Array.from(doc.querySelectorAll('a'))
+                    .map(a => a.href)
+                    .filter(href => href.endsWith('.wav'))
+                    .sort();
+            } catch (error) {
+                console.error('Error loading file list:', error);
+            }
+        }
+
+        async function startTest() {
+            await loadFileList();
             document.getElementById('guidance-page').classList.add('hidden');
             document.getElementById('test-page').classList.remove('hidden');
             loadItem();
         }
 
-        function loadItem() {
-            if (currentIndex >= files.length) {
+        async function loadItem() {
+            if (currentIndex >= audioFiles.length) {
                 showResults();
                 return;
             }
 
-            const fileName = files[currentIndex];
-            document.getElementById('item-title').textContent = `Item ${currentIndex + 1}`;
-            document.getElementById('audio-player').src = `${audioFolder}${fileName}.wav`;
+            // Reset score buttons
+            document.querySelectorAll('.score-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            document.getElementById('next-button').disabled = true;
+            selectedScore = null;
 
-            fetch(`${textFolder}${fileName}.txt`)
-                .then((response) => response.text())
-                .then((text) => {
-                    document.getElementById('text-content').textContent = text;
-                });
+            // Update progress
+            document.getElementById('progress-text').textContent = `${currentIndex + 1}/${audioFiles.length}`;
+
+            // Load audio
+            const audioPlayer = document.getElementById('audio-player');
+            audioPlayer.src = audioFiles[currentIndex];
+
+            // Load text
+            const textFileName = audioFiles[currentIndex].replace('audio/', 'text/').replace('.wav', '.txt');
+            try {
+                const response = await fetch(textFileName);
+                const text = await response.text();
+                document.getElementById('text-content').textContent = text;
+            } catch (error) {
+                console.error('Error loading text file:', error);
+            }
         }
 
-        function recordScore(score) {
-            scores[currentIndex] = score;
+        function selectScore(score) {
+            selectedScore = score;
+            document.querySelectorAll('.score-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            document.querySelectorAll('.score-button')[score].classList.add('selected');
+            document.getElementById('next-button').disabled = false;
         }
 
         function nextItem() {
+            scores[currentIndex] = selectedScore;
             currentIndex++;
             loadItem();
         }
 
         function showResults() {
-            const average = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2);
-
+            const average = scores.reduce((a, b) => a + b, 0) / scores.length;
             document.getElementById('test-page').classList.add('hidden');
             document.getElementById('result-page').classList.remove('hidden');
+            document.getElementById('average-score').textContent = average.toFixed(2);
+            
+            const detailedScores = audioFiles.map((file, index) => {
+                const fileName = file.split('/').pop();
+                return `${fileName}: ${scores[index]}`;
+            }).join('\n');
+            document.getElementById('detailed-scores').textContent = detailedScores;
+        }
 
-            document.getElementById('average-score').textContent = `Average Score: ${average}`;
-            document.getElementById('detailed-scores').textContent = `Detailed Scores: ${scores.join(', ')}`;
+        function downloadResults() {
+            const results = {
+                average: scores.reduce((a, b) => a + b, 0) / scores.length,
+                detailed: audioFiles.map((file, index) => ({
+                    file: file.split('/').pop(),
+                    score: scores[index]
+                }))
+            };
 
-            // Save the results to a file (or send them to a server, if needed)
-            const resultsData = JSON.stringify({ average, scores }, null, 2);
-            console.log('Results:', resultsData); // Replace this with actual saving logic if required
+            const blob = new Blob([JSON.stringify(results, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'evaluation_results.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
     </script>
 </body>
