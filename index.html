@@ -67,6 +67,12 @@
             font-weight: bold;
             color: #666;
         }
+        .speaker {
+        font-weight: bold;
+        color: #2563eb;
+        text-decoration: underline;
+        margin-right: 5px;
+    }
     </style>
 </head>
 <body>
@@ -198,7 +204,19 @@
             try {
                 const response = await fetch(textFileName);
                 const text = await response.text();
-                document.getElementById('text-content').textContent = text;
+                
+                // 处理文本，突出显示说话者
+                const formattedText = text.split('\n').map(line => {
+                    const colonIndex = line.indexOf('：'); // 查找中文冒号
+                    if (colonIndex !== -1) {
+                        const speaker = line.substring(0, colonIndex);
+                        const content = line.substring(colonIndex);
+                        return `<span class="speaker">${speaker}</span>${content}`;
+                    }
+                    return line;
+                }).join('<br>');
+    
+                document.getElementById('text-content').innerHTML = formattedText;
             } catch (error) {
                 console.error('Error loading text file:', error);
             }
