@@ -85,6 +85,31 @@
             margin-bottom: 15px;
             font-size: 1.2em;
         }
+        .email-section {
+            margin-top: 20px;
+            text-align: center;
+        }
+    
+        .email-note {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px dashed #ccc;
+        }
+    
+        .note-text, .note-text-en {
+            margin: 5px 0;
+            color: #666;
+            font-size: 0.9em;
+        }
+    
+        .email-address {
+            margin: 10px 0;
+            font-weight: bold;
+            color: #2563eb;
+            font-size: 1.1em;
+        }
     </style>
 </head>
 <body>
@@ -138,7 +163,15 @@
             <p>Detailed Scores:</p>
             <pre id="detailed-scores"></pre>
         </div>
-        <button class="button" onclick="sendResultsByEmail()">Send Results by Email</button>
+
+        <div class="email-section">
+            <button class="button" onclick="sendResultsByEmail()">Send Results by Email</button>
+            <div class="email-note">
+                <p class="note-text">如果无法自动跳转发送邮件，请截图结果页面发送至：</p>
+                <p class="email-address">yujiaxiao@link.cuhk.edu.hk</p>
+                <p class="note-text-en">If email client doesn't open automatically, please take a screenshot and send to the email address above.</p>
+            </div>
+        </div>
     </div>
 
     <script>
