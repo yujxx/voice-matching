@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f9f9f9;
+        }
+        .container {
+            text-align: center;
+            max-width: 600px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        .hidden {
+            display: none;
+        }
+        .button {
+            margin: 10px;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .score-buttons button {
+            margin: 5px;
+            padding: 10px;
+            background-color: #e0e0e0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .score-buttons button:hover {
+            background-color: #d0d0d0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="guidance-page">
+        <h1>Welcome to the Test Page</h1>
+        <p>
+        On this test page, you will go through 40 items. Each item includes an audio file and a corresponding text file. 
+        The text will display the speakers and their dialogue, with three speakers in each conversation. 
+        Your task is to listen to the audio, read the text, and judge whether the tone of each speaker matches the current context and scenario based on your subjective impression. Then, provide a rating from 0 to 3:
+        </p>
+        <ul>
+            <li>0: Completely does not match</li>
+            <li>1: Only one speaker matches</li>
+            <li>2: Two speakers match</li>
+            <li>3: All speakers mostly match</li>
+        </ul>
+        <p>
+            During the audio playback, you can drag the progress bar; you only need to ensure you hear the parts where all three speakers are talking, without needing to listen to each speaker's complete dialogue.
+        </p>
+        <p>
+            在此测试页面上，您将处理40个项目。每个项目包括一个音频文件和一个对应的文本文件。  
+            文本中会展示说话人及其说话内容，每组对话中有三个说话人。  
+            您的任务是听音频、阅读文本，根据您的主观感受，判断音频中每个说话人的音色是否符合当前的上下文和场景，然后给出评分，评分范围从0到3：
+        </p>
+        <ul>
+            <li>0分：完全不符合</li>
+            <li>1分：只有一个说话人符合</li>
+            <li>2分：两个说话人符合</li>
+            <li>3分：基本都符合</li>
+        </ul>
+        <p>
+            在听音频的过程中，您可以拖动进度条，只需确保听到三个说话人的发言部分，不要求听完每个人的完整说话内容。
+        </p>
+        <button class="button" onclick="startTest()">Start</button>
+    </div>
+
+    <div class="container hidden" id="test-page">
+        <h2 id="item-title">Item 1</h2>
+        <audio id="audio-player" controls></audio>
+        <p id="text-content"></p>
+        <div class="score-buttons">
+            <button onclick="recordScore(0)">0</button>
+            <button onclick="recordScore(1)">1</button>
+            <button onclick="recordScore(2)">2</button>
+            <button onclick="recordScore(3)">3</button>
+        </div>
+        <button class="button" onclick="nextItem()">Next</button>
+    </div>
+
+    <div class="container hidden" id="result-page">
+        <h1>Results</h1>
+        <p id="average-score"></p>
+        <p id="detailed-scores"></p>
+    </div>
+
+    <script>
+        const audioFolder = 'audio/';
+        const textFolder = 'text/';
+        const files = Array.from({ length: 40 }, (_, i) => `file${i + 1}`);
+        const scores = [];
+        let currentIndex = 0;
+
+        function startTest() {
+            document.getElementById('guidance-page').classList.add('hidden');
+            document.getElementById('test-page').classList.remove('hidden');
+            loadItem();
+        }
+
+        function loadItem() {
+            if (currentIndex >= files.length) {
+                showResults();
+                return;
+            }
+
+            const fileName = files[currentIndex];
+            document.getElementById('item-title').textContent = `Item ${currentIndex + 1}`;
+            document.getElementById('audio-player').src = `${audioFolder}${fileName}.wav`;
+
+            fetch(`${textFolder}${fileName}.txt`)
+                .then((response) => response.text())
+                .then((text) => {
+                    document.getElementById('text-content').textContent = text;
+                });
+        }
+
+        function recordScore(score) {
+            scores[currentIndex] = score;
+        }
+
+        function nextItem() {
+            currentIndex++;
+            loadItem();
+        }
+
+        function showResults() {
+            const average = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2);
+
+            document.getElementById('test-page').classList.add('hidden');
+            document.getElementById('result-page').classList.remove('hidden');
+
+            document.getElementById('average-score').textContent = `Average Score: ${average}`;
+            document.getElementById('detailed-scores').textContent = `Detailed Scores: ${scores.join(', ')}`;
+
+            // Save the results to a file (or send them to a server, if needed)
+            const resultsData = JSON.stringify({ average, scores }, null, 2);
+            console.log('Results:', resultsData); // Replace this with actual saving logic if required
+        }
+    </script>
+</body>
+</html>
