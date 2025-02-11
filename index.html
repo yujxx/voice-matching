@@ -109,6 +109,53 @@
     </div>
 
     <script>
+        // config.js
+        const CONFIG = {
+            audioFiles: [
+                'audio/common-sense_31.wav',
+                'audio/common-sense_32.wav',
+                'audio/common-sense_33.wav',
+                'audio/common-sense_34.wav',
+                'audio/common-sense_35.wav',
+                'audio/common-sense_36.wav',
+                'audio/common-sense_37.wav',
+                'audio/common-sense_38.wav',
+                'audio/common-sense_39.wav',
+                'audio/common-sense_40.wav',
+                'audio/counterfactual_51.wav',
+                'audio/counterfactual_52.wav',
+                'audio/counterfactual_53.wav',
+                'audio/counterfactual_54.wav',
+                'audio/counterfactual_55.wav',
+                'audio/counterfactual_56.wav',
+                'audio/counterfactual_57.wav',
+                'audio/counterfactual_58.wav',
+                'audio/counterfactual_59.wav',
+                'audio/counterfactual_60.wav',
+                'audio/generic_1.wav',
+                'audio/generic_2.wav',
+                'audio/generic_3.wav',
+                'audio/generic_4.wav',
+                'audio/generic_5.wav',
+                'audio/generic_6.wav',
+                'audio/generic_7.wav',
+                'audio/generic_8.wav',
+                'audio/generic_9.wav',
+                'audio/generic_10.wav',
+                'audio/knowledge_11.wav',
+                'audio/knowledge_12.wav',
+                'audio/knowledge_13.wav',
+                'audio/knowledge_14.wav',
+                'audio/knowledge_15.wav',
+                'audio/knowledge_16.wav',
+                'audio/knowledge_17.wav',
+                'audio/knowledge_18.wav',
+                'audio/knowledge_19.wav',
+                'audio/knowledge_20.wav',
+                // ... 其他文件
+            ]
+        };
+        
         let audioFiles = [];
         let textFiles = [];
         let currentIndex = 0;
@@ -116,18 +163,7 @@
         let selectedScore = null;
 
         async function loadFileList() {
-            try {
-                const response = await fetch('audio/');
-                const text = await response.text();
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(text, 'text/html');
-                audioFiles = Array.from(doc.querySelectorAll('a'))
-                    .map(a => a.href)
-                    .filter(href => href.endsWith('.wav'))
-                    .sort();
-            } catch (error) {
-                console.error('Error loading file list:', error);
-            }
+            audioFiles = CONFIG.audioFiles;
         }
 
         async function startTest() {
