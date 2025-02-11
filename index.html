@@ -110,6 +110,49 @@
             color: #2563eb;
             font-size: 1.1em;
         }
+        .loading-indicator {
+        text-align: center;
+        padding: 20px;
+        margin: 10px 0;
+        }
+    
+        .loading-indicator.hidden {
+            display: none;
+        }
+    
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+    
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    
+        .error-message {
+            color: #e74c3c;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #fde8e8;
+            border-radius: 4px;
+            text-align: center;
+        }
+    
+        .retry-button {
+            background-color: #3498db;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -145,6 +188,10 @@
 
     <div class="container hidden" id="test-page">
         <div class="progress">Progress: <span id="progress-text">1/40</span></div>
+        <div id="loading-indicator" class="loading-indicator hidden">
+            <div class="spinner"></div>
+            <p>Loading audio...</p>
+        </div>
         <audio id="audio-player" controls style="width: 100%"></audio>
         <div class="text-content" id="text-content"></div>
         <div class="score-buttons">
@@ -228,6 +275,58 @@
         let scores = [];
         let selectedScore = null;
 
+        // 添加新的音频预加载系统
+        class AudioLoader {
+            constructor() {
+                this.audioCache = new Map();
+                this.loadingPromises = new Map();
+            }
+    
+            async preloadAudio(url) {
+                if (this.audioCache.has(url)) {
+                    return this.audioCache.get(url);
+                }
+    
+                if (this.loadingPromises.has(url)) {
+                    return this.loadingPromises.get(url);
+                }
+    
+                const loadingPromise = new Promise((resolve, reject) => {
+                    const audio = new Audio();
+                    audio.preload = 'auto';
+    
+                    audio.addEventListener('canplaythrough', () => {
+                        this.audioCache.set(url, audio);
+                        this.loadingPromises.delete(url);
+                        resolve(audio);
+                    }, { once: true });
+    
+                    audio.addEventListener('error', (e) => {
+                        this.loadingPromises.delete(url);
+                        reject(new Error(`Failed to load audio: ${url}`));
+                    }, { once: true });
+    
+                    audio.src = url;
+                });
+    
+                this.loadingPromises.set(url, loadingPromise);
+                return loadingPromise;
+            }
+    
+            async preloadNext(currentIndex, audioFiles) {
+                const nextIndex = currentIndex + 1;
+                if (nextIndex < audioFiles.length) {
+                    try {
+                        await this.preloadAudio(audioFiles[nextIndex]);
+                    } catch (error) {
+                        console.warn('Failed to preload next audio:', error);
+                    }
+                }
+            }
+        }
+    
+        const audioLoader = new AudioLoader();
+        
         async function loadFileList() {
             audioFiles = CONFIG.audioFiles;
         }
@@ -236,6 +335,13 @@
             await loadFileList();
             document.getElementById('guidance-page').classList.add('hidden');
             document.getElementById('test-page').classList.remove('hidden');
+            // 预加载第一个音频文件
+            try {
+                await audioLoader.preloadAudio(audioFiles[0]);
+            } catch (error) {
+                console.warn('Failed to preload first audio:', error);
+            }
+            
             loadItem();
         }
 
@@ -244,30 +350,43 @@
                 showResults();
                 return;
             }
-
-            // Reset score buttons
+    
+            // Reset UI
             document.querySelectorAll('.score-button').forEach(btn => {
                 btn.classList.remove('selected');
             });
             document.getElementById('next-button').disabled = true;
             selectedScore = null;
-
-            // Update progress
-            document.getElementById('progress-text').textContent = `${currentIndex + 1}/${audioFiles.length}`;
-
-            // Load audio
-            const audioPlayer = document.getElementById('audio-player');
-            audioPlayer.src = audioFiles[currentIndex];
-
-            // Load text
-            const textFileName = audioFiles[currentIndex].replace('audio/', 'text/').replace('.wav', '.txt');
+    
+            // Show loading indicator
+            const loadingIndicator = document.getElementById('loading-indicator');
+            loadingIndicator.classList.remove('hidden');
+    
             try {
+                // Update progress
+                document.getElementById('progress-text').textContent = `${currentIndex + 1}/${audioFiles.length}`;
+    
+                // Load audio
+                const audioPlayer = document.getElementById('audio-player');
+                const audioUrl = audioFiles[currentIndex];
+                
+                try {
+                    const audio = await audioLoader.preloadAudio(audioUrl);
+                    audioPlayer.src = audio.src;
+                    // Preload next audio file
+                    audioLoader.preloadNext(currentIndex, audioFiles);
+                } catch (error) {
+                    throw new Error(`Failed to load audio: ${error.message}`);
+                }
+    
+                // Load text
+                const textFileName = audioFiles[currentIndex].replace('audio/', 'text/').replace('.wav', '.txt');
                 const response = await fetch(textFileName);
                 const text = await response.text();
                 
-                // 处理文本，突出显示说话者
+                // Format text
                 const formattedText = text.split('\n').map(line => {
-                    const colonIndex = line.indexOf('：'); // 查找中文冒号
+                    const colonIndex = line.indexOf('：');
                     if (colonIndex !== -1) {
                         const speaker = line.substring(0, colonIndex);
                         const content = line.substring(colonIndex);
@@ -277,8 +396,18 @@
                 }).join('<br>');
     
                 document.getElementById('text-content').innerHTML = formattedText;
+    
             } catch (error) {
-                console.error('Error loading text file:', error);
+                console.error('Error loading item:', error);
+                document.getElementById('text-content').innerHTML = `
+                    <div class="error-message">
+                        Error loading content. Please try again.
+                        <br>
+                        <button class="retry-button" onclick="loadItem()">Retry</button>
+                    </div>
+                `;
+            } finally {
+                loadingIndicator.classList.add('hidden');
             }
         }
 
